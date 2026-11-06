@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+# drive-action <mount|unmount|open|terminal|eject> </dev/node>
+# Prints a mount point on success where one applies. On failure, stderr gets an
+# error code the panel translates (E:busy, E:busy-by:<apps>, E:not-authorized,
+# E:mount-failed, E:not-device), or the system's own message otherwise.
+set -uo pipefail
+action=${1:-}
+dev=${2:-}
+[[ $dev =~ ^/dev/[A-Za-z0-9._-]+$ && -b $dev ]] || { echo "E:not-device" >&2; exit 2; }
+
+# lsblk prints the path literally; findmnt -r escapes spaces as \x20, which
+# broke drives with a space in their name ("My Passport").
+mountpoint_of() { lsblk -no MOUNTPOINT -- "$1" 2>/dev/null | sed '/^$/d' | head -n1; }
+
+reason() {
+  case $1 in
+    *[Bb]usy*) echo "E:busy" ;;
+    *NotAuthorized*|*[Nn]ot\ authorized*) echo "E:not-authorized" ;;
+    *) echo "$1" | sed -E 's/^Error [a-z]+ing [^:]*: //; s/^GDBus\.Error:[^:]*: //' | head -c 200 ;;
+  esac
+}
+
+# Mount if needed and print the mount point. udiskie mounts new drives too,
+# so a failed mount is checked again in case it just won that race.
+ensure_mounted() {
+  local mp; mp=$(mountpoint_of "$1")
+  if [[ -z $mp ]]; then
+    local out
+    if ! out=$(udisksctl mount -b "$1" 2>&1); then
+      sleep 0.15; mp=$(mountpoint_of "$1")
+      [[ -n $mp ]] || { reason "$out" >&2; return 1; }
+    fi
+    mp=$(mountpoint_of "$1")
+  fi
+  [[ -n $mp ]] || { echo "E:mount-failed" >&2; return 1; }
+  printf '%s\n' "$mp"
+}
+
+# A path as a find(1) -lname pattern: glob characters escaped.
+glob_escape() { printf '%s' "$1" | sed 's/[][*?\\]/\\&/g'; }
+
+# PIDs (of this user) with a working directory or an open file on the mount.
+# Reads /proc directly in one find call; no psmisc/fuser needed.
+pids_using() {
+  local esc; esc=$(glob_escape "$1")
+  find /proc/[0-9]*/cwd /proc/[0-9]*/fd/ -mindepth 0 -maxdepth 1 -user "$UID" \
+       \( -lname "$esc" -o -lname "$esc/*" \) -printf '%p\n' 2>/dev/null \
+    | sed -E 's#^/proc/([0-9]+)/.*#\1#' | sort -un
+}
+
+# Names of processes keeping a mount busy, for the error message.
+holders() {
+  local mp; mp=$(mountpoint_of "$1"); [[ -n $mp ]] || return
+  pids_using "$mp" | xargs -r -I{} cat /proc/{}/comm 2>/dev/null \
+    | sort -u | head -n 4 | paste -sd, | sed 's/,/, /g'
+}
+
+FILE_MANAGERS='nautilus nemo thunar Thunar dolphin pcmanfm pcmanfm-qt caja'
+
+# Folders under the mount that a process has open. A file manager keeps one
+# open for each folder it shows, so this says what its windows display
+# without reading anything from the (possibly slow, spinning) drive.
+open_dirs_under() {
+  local esc; esc=$(glob_escape "$1")
+  find /proc/"$2"/fd -mindepth 1 -maxdepth 1 \( -lname "$esc" -o -lname "$esc/*" \) \
+       -printf '%l\n' 2>/dev/null
+}
+
+# Like a desktop eject: close file manager windows showing this drive, since
+# they keep its folders open. A window matches when its title is the name of
+# a folder that process has open on the drive; other windows stay open.
+close_browsing_windows() {
+  local mp=$1
+  [[ -n $mp ]] || return 0
+  local fm_pids=() pid
+  for pid in $(pgrep -u "$UID" -x "$(echo $FILE_MANAGERS | tr ' ' '|')" 2>/dev/null); do
+    [[ -n $(open_dirs_under "$mp" "$pid" | head -n1) ]] && fm_pids+=("$pid")
+  done
+  (( ${#fm_pids[@]} )) || return 0
+  local names=() addr title closed=0
+  for pid in "${fm_pids[@]}"; do
+    while IFS= read -r d; do names+=("$(basename "$d")"); done < <(open_dirs_under "$mp" "$pid")
+  done
+  while IFS=$'\t' read -r addr pid title; do
+    [[ " ${fm_pids[*]} " == *" $pid "* ]] || continue
+    local hit=0 n
+    for n in "${names[@]}"; do [[ $title == "$n" ]] && { hit=1; break; }; done
+    (( hit )) || continue
+    [[ $addr =~ ^0x[0-9a-fA-F]+$ ]] || continue
+    # Lua dispatcher (Hyprland 0.55+), then the classic one for older builds.
+    { hyprctl dispatch "hl.dsp.window.close({ window = \"address:$addr\" })" 2>&1 | grep -qi error \
+        && hyprctl dispatch closewindow "address:$addr" >/dev/null 2>&1; } ; closed=1
+  done < <(hyprctl clients -j 2>/dev/null | jq -r '.[] | [.address, (.pid|tostring), .title] | @tsv')
+  # Wait only as long as needed for the folders to be let go (max ~1.5 s).
+  if (( closed )); then
+    local i
+    for (( i = 0; i < 30; i++ )); do
+      local still=0
+      for pid in "${fm_pids[@]}"; do [[ -n $(open_dirs_under "$mp" "$pid" | head -n1) ]] && still=1; done
+      (( still )) || break
+      sleep 0.05
+    done
+  fi
+  return 0
+}
+
+# Something may still hold a fresh mount for a moment (a thumbnailer), so a
+# busy unmount is retried briefly before giving up.
+unmount_with_retry() {
+  local node=$1 out tries=0 mp
+  mp=$(mountpoint_of "$node")
+  close_browsing_windows "$mp"
+  # Flush just this filesystem; a global sync would wait on every disk.
+  [[ -n $mp ]] && sync -f "$mp" 2>/dev/null
+  while :; do
+    out=$(udisksctl unmount -b "$node" 2>&1) && return 0
+    [[ $out == *[Bb]usy* ]] || { reason "$out" >&2; return 1; }
+    (( ++tries >= 12 )) && break
+    sleep 0.25
+  done
+  local who; who=$(holders "$node")
+  if [[ -n $who ]]; then echo "E:busy-by:$who" >&2
+  else reason "$out" >&2; fi
+  return 1
+}
+
+case $action in
+  mount) ensure_mounted "$dev" ;;
+  open)
+    mp=$(ensure_mounted "$dev") || exit 1
+    # gio directly: xdg-open is a shell script that ends up here anyway.
+    setsid -f gio open "$mp" >/dev/null 2>&1
+    printf '%s\n' "$mp" ;;
+  terminal)
+    mp=$(ensure_mounted "$dev") || exit 1
+    setsid -f xdg-terminal-exec --dir="$mp" >/dev/null 2>&1
+    printf '%s\n' "$mp" ;;
+  unmount) unmount_with_retry "$dev" || exit 1 ;;
+  eject)
+    while read -r node mp; do
+      [[ -n ${mp:-} ]] || continue
+      unmount_with_retry "$node" || exit 1
+    done < <(lsblk -nrpo NAME,MOUNTPOINT "$dev")
+    out=$(udisksctl power-off -b "$dev" 2>&1) || { reason "$out" >&2; exit 1; } ;;
+  *) echo "Unknown action" >&2; exit 2 ;;
+esac

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "softwave.drives",
+  "name": "Drives",
+  "version": "1.0.0",
+  "author": "Profit94",
+  "license": "MIT",
+  "description": "Removable drives in the bar: USB sticks, SD cards and external SSD, HDD or NVMe disks. Notifies on attach and removal, opens new drives in the file manager, and ejects them safely.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "Panel.qml" },
+  "barWidget": {
+    "displayName": "Drives",
+    "description": "Appears while a removable drive is attached. Left-click for details, right-click for actions.",
+    "category": "Status",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": { "autoOpen": true, "notify": true, "alwaysShow": false },
+    "schema": [
+      { "key": "autoOpen", "type": "boolean", "label": "Open new drives in the file manager", "defaultValue": true },
+      { "key": "notify", "type": "boolean", "label": "Notify when a drive is attached or removed", "defaultValue": true },
+      { "key": "alwaysShow", "type": "boolean", "label": "Keep the icon when no drive is attached", "defaultValue": false }
+    ]
+  }
+}
