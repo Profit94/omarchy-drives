@@ -34,7 +34,7 @@ assert.strictEqual(M.usageLevel(0.35), "ok")
 assert.strictEqual(M.usageLevel(0.75), "warn")
 assert.strictEqual(M.usageLevel(0.95), "full")
 const pal = M.parsePalette('red = "#c94f6d"\ngreen = "#81b29a"\ncolor3 = "#dbc074"\ncolor1 = "#000000"')
-assert.deepStrictEqual(pal, { red: "#c94f6d", green: "#81b29a", yellow: "#dbc074" })
+assert.deepStrictEqual([pal.red, pal.green, pal.yellow], ["#c94f6d", "#81b29a", "#dbc074"])
 // strip: edges on the 1.25 pixel grid, ends flush, gaps equal, tiny parts kept visible
 {
   const g = 1.25, W = 300.8
@@ -67,3 +67,22 @@ assert.deepStrictEqual(pal, { red: "#c94f6d", green: "#81b29a", yellow: "#dbc074
   assert.strictEqual(M.notifyFillSteps(50), 5)
 }
 console.log("ok")
+
+// Level colours: real theme hues are kept, wrong or grey ones replaced by the right hue.
+{
+  const hue = h => M.hexToHsl(h).h
+  const near = (h, c, w) => Math.min(Math.abs(h - c), 360 - Math.abs(h - c)) <= w
+  const keep = M.levelPalette('mode = "dark"\ngreen = "#81b29a"\nyellow = "#dbc074"\nred = "#c94f6d"\n')
+  assert.deepStrictEqual(keep, { ok: "#81b29a", warn: "#dbc074", full: "#c94f6d" })
+  for (const text of ['green = "#4fe88f"\nyellow = "#50f7d4"\nred = "#50f872"', // all green
+                      'green = "#b6b6b6"\nyellow = "#cecece"\nred = "#a4a4a4"', // grey
+                      'mode = "light"\ngreen = "#3a3a3a"\nyellow = "#4a4a4a"\nred = "#2a2a2a"',
+                      'color1 = "#F07178"\ncolor2 = "#C2B8FF"\ncolor3 = "#DDCCFF"', '']) {
+    const p = M.levelPalette(text)
+    assert.ok(near(hue(p.ok), 120, 50), "ok hue " + p.ok)
+    assert.ok(near(hue(p.warn), 47, 20), "warn hue " + p.warn)
+    assert.ok(near(hue(p.full), 355, 25), "full hue " + p.full)
+  }
+  assert.ok(M.hexToHsl(M.levelPalette('mode = "light"\ngreen = "#3a3a3a"').ok).l < 0.5, "darker on light themes")
+  console.log("level palette ok")
+}

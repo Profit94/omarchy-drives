@@ -153,17 +153,76 @@ function usageLevel(fraction) {
   return fraction >= 0.9 ? "full" : fraction >= 0.7 ? "warn" : "ok"
 }
 
-// green/yellow/red from an Omarchy colors.toml (named keys or color1..3).
+// Every hex colour in an Omarchy colors.toml, by key. color1..3 also fill
+// red/green/yellow when the named keys are missing.
 function parsePalette(text) {
   var out = {}
   var alias = { color1: "red", color2: "green", color3: "yellow" }
   String(text || "").split("\n").forEach(function(line) {
     var m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*["']?(#[0-9A-Fa-f]{6})/)
+    var mode = line.match(/^\s*mode\s*=\s*["']?(light|dark)/)
+    if (mode) out.mode = mode[1]
     if (!m) return
-    var key = m[1]
-    if (key === "red" || key === "green" || key === "yellow") out[key] = m[2]
-    else if (alias[key] && !out[alias[key]]) out[alias[key]] = m[2]
+    out[m[1]] = m[2]
+    if (alias[m[1]] && !out[alias[m[1]]]) out[alias[m[1]]] = m[2]
   })
+  return out
+}
+
+function hexToHsl(hex) {
+  var n = parseInt(String(hex).slice(1), 16)
+  var r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255
+  var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min
+  if (d === 0) return { h: 0, s: 0, l: l }
+  var s = d / (1 - Math.abs(2 * l - 1))
+  var h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return { h: (h * 60 + 360) % 360, s: s, l: l }
+}
+
+function hslToHex(h, s, l) {
+  var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2
+  var rgb = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]
+  return "#" + rgb.map(function(v) {
+    var k = Math.round((v + m) * 255).toString(16)
+    return k.length < 2 ? "0" + k : k
+  }).join("")
+}
+
+// Green / yellow / red for the radar, taken from the theme when the theme's
+// colour really has that hue. Many themes reuse those slots for their own
+// accents (all green in hackerman, all blue in lumon, grey in vantablack,
+// amber "green" in matte-black), which made the three levels look alike.
+// A slot that fails the hue check tries its neighbours (bright_*, orange),
+// then falls back to a plain hue at the theme's own lightness.
+var LEVELS = {
+  ok:   { keys: ["green", "bright_green"],                 lo: 68,  hi: 165, h: 140 },
+  warn: { keys: ["yellow", "bright_yellow", "orange"],     lo: 28,  hi: 66,  h: 45 },
+  full: { keys: ["red", "bright_red", "orange"],           lo: 335, hi: 20,  h: 355 }
+}
+
+function inHue(h, lo, hi) { return lo <= hi ? h >= lo && h <= hi : h >= lo || h <= hi }
+
+function levelPalette(text) {
+  var pal = parsePalette(text)
+  var light = pal.mode ? pal.mode === "light" : (pal.background ? hexToHsl(pal.background).l > 0.5 : false)
+  var out = {}, misses = [], lights = []
+  Object.keys(LEVELS).forEach(function(level) {
+    var spec = LEVELS[level]
+    for (var i = 0; i < spec.keys.length; i++) {
+      var hex = pal[spec.keys[i]]
+      if (!hex) continue
+      var c = hexToHsl(hex)
+      if (c.s >= 0.18 && c.l >= 0.2 && c.l <= 0.85 && inHue(c.h, spec.lo, spec.hi)) {
+        // orange may stand in for one level only
+        if (spec.keys[i] === "orange" && Object.keys(out).some(function(k) { return out[k] === hex })) continue
+        out[level] = hex; lights.push(c.l); return
+      }
+    }
+    misses.push(level)
+  })
+  var l = lights.length ? lights.reduce(function(a, b) { return a + b }, 0) / lights.length : (light ? 0.4 : 0.64)
+  l = light ? Math.min(0.48, Math.max(0.32, l)) : Math.min(0.72, Math.max(0.55, l))
+  misses.forEach(function(level) { out[level] = hslToHex(LEVELS[level].h, light ? 0.65 : 0.6, l) })
   return out
 }
 
@@ -248,5 +307,5 @@ function validDevice(path) { return /^\/dev\/[A-Za-z0-9._-]+$/.test(String(path 
 
 if (typeof module !== "undefined") module.exports = {
   parseDrives: parseDrives, primaryPart: primaryPart, mountedParts: mountedParts,
-  formatBytes: formatBytes, usageFraction: usageFraction, diff: diff, validDevice: validDevice, kindOf: kindOf, errorKey: errorKey, usageLevel: usageLevel, parsePalette: parsePalette, stripLayout: stripLayout, notifyIconSvg: notifyIconSvg, notifyFillSteps: notifyFillSteps
+  formatBytes: formatBytes, usageFraction: usageFraction, diff: diff, validDevice: validDevice, kindOf: kindOf, errorKey: errorKey, usageLevel: usageLevel, parsePalette: parsePalette, levelPalette: levelPalette, hexToHsl: hexToHsl, stripLayout: stripLayout, notifyIconSvg: notifyIconSvg, notifyFillSteps: notifyFillSteps
 }

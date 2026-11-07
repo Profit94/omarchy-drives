@@ -125,6 +125,7 @@ Panel {
         recent = withKey(recent, d.name, now)
         notify(strings.t("attached").arg(d.title), describe(d), notifyIcon("attached", d))
         root.openAttached(d)
+        root.playSound("attach")
       })
       if (change.added.length > 0) {
         insertTick++
@@ -136,6 +137,7 @@ Panel {
         ejecting = withKey(ejecting, d.name, undefined)
         recent = withKey(recent, d.name, undefined)
         if (wasEjected) return
+        root.playSound("detach")
         if (DriveModel.mountedParts(d).length > 0)
           notify(strings.t("unsafe").arg(d.title), "", notifyIcon("warning", d), "critical")
         else
@@ -185,7 +187,8 @@ Panel {
   // ------------------------------------------------------------- level colours
 
   // Green, yellow and red come from the current theme's palette, so the ring
-  // follows `omarchy theme set`. Re-read whenever the panel opens.
+  // follows `omarchy theme set`. Slots whose colour is not really that hue
+  // are replaced (see DriveModel.levelPalette). Re-read whenever the panel opens.
   property color levelOk: "#81b29a"
   property color levelWarn: "#dbc074"
   property color levelFull: Commons.Color.urgent
@@ -197,10 +200,10 @@ Panel {
     printErrors: false
     onFileChanged: reload()
     onLoaded: {
-      var pal = DriveModel.parsePalette(text())
-      root.levelOk = pal.green || "#81b29a"
-      root.levelWarn = pal.yellow || "#dbc074"
-      root.levelFull = pal.red || Commons.Color.urgent
+      var pal = DriveModel.levelPalette(text())
+      root.levelOk = pal.ok
+      root.levelWarn = pal.warn
+      root.levelFull = pal.full
     }
   }
   onOpenedChanged: {
@@ -349,6 +352,20 @@ Panel {
   }
   onIconKeyChanged: if (outputScale > 0) iconDirMaker.running = true
 
+  // Short robot-and-rocket cues (sounds/, built by tools/make-sounds.py).
+  // Several drives at once play one cue, not a pile-up.
+  property double lastSound: 0
+  function playSound(kind) {
+    if (setting("sound", true) !== true) return
+    var now = Date.now()
+    if (now - lastSound < 300) return
+    lastSound = now
+    var file = Qt.resolvedUrl("sounds/" + kind + ".wav").toString().replace(/^file:\/\//, "")
+    Quickshell.execDetached(["sh", "-c",
+      'if command -v pw-play >/dev/null; then exec pw-play --volume 0.8 "$1"; else exec paplay "$1"; fi',
+      "_", decodeURIComponent(file)])
+  }
+
   function notify(summary, body, icon, urgency) {
     if (setting("notify", true) !== true) return
     var args = ["notify-send", "-a", "Drives", "-i", icon || "drive-removable-media",
@@ -430,6 +447,7 @@ Panel {
         if (drives.length > 1 && ejectQueue.length === 0) launchInBar()
         ejecting = withKey(ejecting, d.name, "done")
         notify(strings.t("ejected").arg(d.title), "", notifyIcon("ejected", d))
+        root.playSound("detach")
       } else {
         ejecting = withKey(ejecting, d.name, undefined)
         failed("eject", d, reason)
@@ -923,6 +941,8 @@ Panel {
         : kind === "removed" ? strings.t("removed").arg(title) : strings.t("unsafe").arg(title)
       root.notify(summary, d ? root.describe(d) : "", root.notifyIcon(kind, d), kind === "warning" ? "critical" : "normal")
     }
+    // Plays a cue: "attach" or "detach".
+    function soundTest(kind: string): void { root.lastSound = 0; root.playSound(kind === "detach" ? "detach" : "attach") }
     function openDetails(): void { root.open() }
     function refresh(): void { root.refresh() }
     // Animation preview: `attach` replays the arrival, `busy` loops for N
