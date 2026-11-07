@@ -36,5 +36,6 @@
   "err.busyBy": "Diskdan %1 foydalanmoqda. Uni yopib, qayta urinib ko‘ring.",
   "err.notAuthorized": "Ruxsat yo‘q.",
   "err.mountFailed": "Diskni tizimga ulab bo‘lmadi.",
-  "err.notDevice": "Disk endi ulanmagan."
+  "err.notDevice": "Disk endi ulanmagan.",
+  "system": "Ushbu kompyuter"
 }

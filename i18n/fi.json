@@ -36,5 +36,6 @@
   "err.busyBy": "Asemaa käyttää %1. Sulje se ja yritä uudelleen.",
   "err.notAuthorized": "Ei oikeuksia.",
   "err.mountFailed": "Asemaa ei voitu liittää.",
-  "err.notDevice": "Asema ei ole enää yhdistettynä."
+  "err.notDevice": "Asema ei ole enää yhdistettynä.",
+  "system": "Tämä tietokone"
 }

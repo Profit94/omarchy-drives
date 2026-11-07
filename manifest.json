@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "softwave.drives",
   "name": "Drives",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Profit94",
   "license": "MIT",
   "description": "Removable drives in the bar: USB sticks, SD cards and external SSD, HDD or NVMe disks. Notifies on attach and removal, opens new drives in the file manager, and ejects them safely.",

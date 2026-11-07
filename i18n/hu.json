@@ -36,5 +36,6 @@
   "err.busyBy": "A meghajtót a(z) %1 használja. Zárd be, és próbáld újra.",
   "err.notAuthorized": "Nincs jogosultság.",
   "err.mountFailed": "A meghajtót nem sikerült csatolni.",
-  "err.notDevice": "A meghajtó már nincs csatlakoztatva."
+  "err.notDevice": "A meghajtó már nincs csatlakoztatva.",
+  "system": "Ez a számítógép"
 }

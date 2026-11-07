@@ -35,5 +35,6 @@
   "err.busyBy": "Pemacu sedang digunakan oleh %1. Tutup dan cuba lagi.",
   "err.notAuthorized": "Tidak dibenarkan.",
   "err.mountFailed": "Pemacu tidak dapat dilekapkan.",
-  "err.notDevice": "Pemacu tidak lagi disambungkan."
+  "err.notDevice": "Pemacu tidak lagi disambungkan.",
+  "system": "Komputer ini"
 }

@@ -37,5 +37,6 @@
   "err.busyBy": "Disk používá %1. Zavřete ho a zkuste to znovu.",
   "err.notAuthorized": "Chybí oprávnění.",
   "err.mountFailed": "Disk nelze připojit.",
-  "err.notDevice": "Disk už není připojen."
+  "err.notDevice": "Disk už není připojen.",
+  "system": "Tento počítač"
 }

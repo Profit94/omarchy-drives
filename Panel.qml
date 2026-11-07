@@ -55,6 +55,8 @@ Panel {
     id: hideDelay
     interval: 450
     onTriggered: {
+      // Let the last drive's launch finish before the panel goes.
+      if (root.opened && Object.keys(root.departed).length > 0) { restart(); return }
       root.iconShown = false
       root.close()
     }
@@ -112,7 +114,21 @@ Panel {
   Component.onCompleted: {
     refresh()
     scaleProbe.running = true
+    systemProbe.running = true
   }
+
+  // ------------------------------------------------------------ system disk
+
+  // The computer's own disk, shown above the drives in the left-click panel.
+  property var system: null
+  Process {
+    id: systemProbe
+    command: ["sh", "-c", 'df -B1 --output=size,used,avail,fstype / | tail -n1; src=$(findmnt -no SOURCE / | sed "s/\\[.*//"); lsblk -nsro TYPE,ROTA,TRAN,MODEL -- "$src" 2>/dev/null | grep "^disk " | head -n1']
+    stdout: StdioCollector {
+      onStreamFinished: root.system = DriveModel.parseSystem(String(text || ""))
+    }
+  }
+  function refreshSystem() { if (!systemProbe.running) systemProbe.running = true }
 
   function applySnapshot(text) {
     var next = DriveModel.parseDrives(text)
@@ -153,6 +169,7 @@ Panel {
       })
     }
     drives = next
+    syncEjectModel()
     if (!loaded) {
       loaded = true
       if (wantsIcon) { iconShown = true; insertTick++ }
@@ -202,7 +219,10 @@ Panel {
       root.levelFull = pal.red || Commons.Color.urgent
     }
   }
-  onOpenedChanged: if (opened) { themeColors.reload(); scaleProbe.running = true }
+  onOpenedChanged: {
+    if (opened) { themeColors.reload(); scaleProbe.running = true; refreshSystem() }
+    else if (Object.keys(departed).length > 0) { departed = ({}); syncEjectModel() }
+  }
 
   function levelColor(fraction) {
     var level = DriveModel.usageLevel(fraction)
@@ -421,6 +441,10 @@ Panel {
       console.log("softwave.drives: eject", d.path, ok ? "ok" : "failed: " + reason)
       if (then) Qt.callLater(then)
       if (ok) {
+        if (root.opened && root.ejectMode) {
+          departed = withKey(departed, d.name, d)
+          departSafety.restart()
+        }
         ejecting = withKey(ejecting, d.name, "done")
         notify(strings.t("ejected").arg(d.title), "", notifyIcon("ejected", d))
       } else {
@@ -429,7 +453,41 @@ Panel {
       }
       root.refresh()
     })
-    close()
+    if (!ejectMode) close()
+  }
+
+  // ------------------------------------------------------- eject list model
+
+  // The eject popup keeps its rows in a ListModel synced by name, so a
+  // refresh doesn't rebuild them and cut a launch short. A drive that was
+  // just ejected stays in `departed` until its row has flown out.
+  property var departed: ({})
+  readonly property var driveMap: DriveModel.byName(drives)
+  ListModel { id: ejectModel }
+
+  function syncEjectModel() {
+    var keep = {}
+    drives.forEach(function(d) { keep[d.name] = true })
+    for (var i = ejectModel.count - 1; i >= 0; i--) {
+      var n = ejectModel.get(i).name
+      if (!keep[n] && !departed[n]) ejectModel.remove(i)
+    }
+    drives.forEach(function(d) {
+      for (var j = 0; j < ejectModel.count; j++) if (ejectModel.get(j).name === d.name) return
+      ejectModel.append({ name: d.name })
+    })
+  }
+
+  function landed(name) {
+    departed = withKey(departed, name, undefined)
+    syncEjectModel()
+  }
+
+  // Fallback if a row never got to play (panel closed mid-launch).
+  Timer {
+    id: departSafety
+    interval: 2500
+    onTriggered: { root.departed = ({}); root.syncEjectModel() }
   }
 
   // One drive after another: running them together let two ejects race over
@@ -445,6 +503,28 @@ Panel {
     ejectQueue = ejectQueue.slice(1)
     eject(d, ejectNext)
   }
+
+  // A dry-run eject for `preview launch`: rumble, then fly out, then return.
+  property string previewName: ""
+  function previewLaunch(seconds) {
+    if (!latest) return
+    previewName = latest.name
+    ejectMode = true
+    open()
+    ejecting = withKey(ejecting, previewName, "busy")
+    previewLaunchTimer.interval = seconds * 1000
+    previewLaunchTimer.restart()
+  }
+  Timer {
+    id: previewLaunchTimer
+    onTriggered: {
+      var d = root.driveMap[root.previewName]
+      root.ejecting = root.withKey(root.ejecting, root.previewName, undefined)
+      if (d) root.departed = root.withKey(root.departed, d.name, d)
+      previewReturn.restart()
+    }
+  }
+  Timer { id: previewReturn; interval: 2200; onTriggered: root.landed(root.previewName) }
 
   // Middle-click and IPC: act on the most recently attached drive.
   readonly property var latest: hasDrives ? drives[drives.length - 1] : null
@@ -551,6 +631,103 @@ Panel {
           }
         }
 
+        // The computer's own disk, in a quieter card: no hover, no actions.
+        Item {
+          id: systemCard
+          visible: !!root.system
+          width: listColumn.width
+          height: Style.space(36) + Style.space(20)
+          readonly property real fraction: root.system && root.system.total > 0 ? Math.min(1, root.system.used / root.system.total) : 0
+
+          BorderSurface {
+            id: systemSurface
+            width: systemSnap.px(parent.width)
+            height: systemSnap.px(parent.height)
+            transform: Translate { id: systemShift }
+            radius: Style.cornerRadius
+            color: "transparent"
+            borderSpec: Border.controlSpec("normal", root.foreground, Commons.Color.accent)
+
+            PixelSnap { id: systemSnap; target: systemSurface; shift: systemShift; outputScale: root.outputScale }
+          }
+
+          RadarRing {
+            id: systemRadar
+            x: Style.space(10)
+            anchors.verticalCenter: parent.verticalCenter
+            width: systemRadarSnap.px(Style.space(36))
+            height: width
+            outputScale: root.outputScale
+            transform: Translate { id: systemRadarShift }
+            PixelSnap { id: systemRadarSnap; target: systemRadar; shift: systemRadarShift; outputScale: root.outputScale }
+            value: systemCard.fraction
+            showText: false
+            color: root.levelColor(value)
+            trackColor: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.22)
+            fontFamily: root.fontFamily
+          }
+
+          Column {
+            anchors.left: systemRadar.right
+            anchors.leftMargin: Style.space(12)
+            anchors.right: systemFree.left
+            anchors.rightMargin: Style.space(8)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Style.space(1)
+
+            SnapText {
+              outputScale: root.outputScale
+              width: parent.width
+              text: strings.t("system")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.body
+              font.bold: true
+              elide: Text.ElideRight
+            }
+            SnapText {
+              outputScale: root.outputScale
+              width: parent.width
+              text: root.system ? [root.kindName(root.system), root.system.fstype, root.size(root.system.total)].filter(function(s) { return s }).join(" · ") : ""
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              elide: Text.ElideRight
+            }
+          }
+
+          Column {
+            id: systemFree
+            anchors.right: parent.right
+            anchors.rightMargin: Style.space(12)
+            anchors.verticalCenter: parent.verticalCenter
+
+            SnapText {
+              outputScale: root.outputScale
+              anchors.right: parent.right
+              width: Math.min(implicitWidth, Style.space(110))
+              horizontalAlignment: Text.AlignRight
+              elide: Text.ElideRight
+              text: root.system ? root.size(root.system.free) : ""
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+            }
+            SnapText {
+              outputScale: root.outputScale
+              anchors.right: parent.right
+              width: Math.min(implicitWidth, Style.space(110))
+              horizontalAlignment: Text.AlignRight
+              elide: Text.ElideRight
+              text: strings.t("free")
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+            }
+          }
+        }
+
         SnapText {
           outputScale: root.outputScale
           visible: !root.hasDrives
@@ -607,11 +784,10 @@ Panel {
                 width: parent.width
                 height: Style.space(48)
 
-                CapacityRing {
+                RadarRing {
                   id: ring
                   width: ringSnap.px(parent.height)
                   height: width
-                  thickness: ringSnap.px(Style.space(3))
                   outputScale: root.outputScale
                   transform: Translate { id: ringShift }
 
@@ -621,9 +797,8 @@ Panel {
                   busy: card.busy
                   color: card.mounted ? root.levelColor(value) : root.foreground
                   textColor: root.foreground
-                  hotColor: color
                   Behavior on color { ColorAnimation { duration: Style.duration(240) } }
-                  trackColor: Style.selectedFillFor(root.foreground, Commons.Color.accent)
+                  trackColor: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.22)
                   fontFamily: root.fontFamily
                 }
 
@@ -872,8 +1047,10 @@ Panel {
       }
 
       // ------------------------------------------------ right-click: eject
-      // One row per drive with its own Eject button; with two or more
-      // attached, an Eject all at the foot.
+      // A plain pop-up: one pad per drive with its own Eject key, and Eject
+      // all at the foot when two or more are attached. Rows don't react to
+      // hover; only the keys do. An ejected drive rumbles while it unmounts,
+      // then drops out of its pad like a rocket and the pad folds away.
       Column {
         id: ejectColumn
         visible: root.ejectMode
@@ -882,7 +1059,7 @@ Panel {
 
         Item {
           width: parent.width
-          height: ejectHeader.implicitHeight + Style.space(4)
+          height: ejectHeader.implicitHeight
 
           PanelSectionHeader {
             id: ejectHeader
@@ -899,7 +1076,6 @@ Panel {
             anchors.top: ejectHeader.top
             anchors.topMargin: ejectHeader.topPadding
             visible: root.drives.length > 1
-            textFormat: Text.PlainText
             text: strings.tn("count", root.drives.length).arg(Commons.I18n.formatNumber(root.drives.length))
             color: root.dim
             font.family: root.fontFamily
@@ -908,10 +1084,8 @@ Panel {
         }
 
         SnapText {
-
           outputScale: root.outputScale
-          visible: !root.hasDrives
-          textFormat: Text.PlainText
+          visible: ejectModel.count === 0
           text: root.connecting ? strings.t("connecting") : strings.t("empty")
           color: root.dim
           font.family: root.fontFamily
@@ -919,54 +1093,122 @@ Panel {
         }
 
         Repeater {
-          model: root.drives
+          model: ejectModel
 
           Item {
-            id: ejectRow
-            required property var modelData
-            readonly property var drive: modelData
-            readonly property var primary: DriveModel.primaryPart(drive)
+            id: pad
+            required property string name
+            readonly property var drive: root.driveMap[name] || root.departed[name] || null
+            readonly property var primary: drive ? DriveModel.primaryPart(drive) : null
             readonly property bool mounted: !!primary && primary.mountpoint !== ""
-            readonly property bool busy: root.ejecting[drive.name] === "busy"
+            readonly property bool busy: root.ejecting[name] === "busy"
+            readonly property bool gone: !!root.departed[name] || root.ejecting[name] === "done"
+            readonly property real fullHeight: Style.space(50)
+            // A little taller than the pad, so the clip never shaves its border.
+            readonly property real slotHeight: fullHeight + Style.space(2)
+            readonly property real grid: root.outputScale > 0 ? root.outputScale : 1
+            readonly property real p: 1 / grid
+            readonly property color tint: mounted ? root.levelColor(DriveModel.usageFraction(primary)) : root.foreground
+
             width: ejectColumn.width
-            height: Style.space(46)
+            height: slotHeight
+            visible: height > 0.5
+            clip: true
 
-            HoverHandler { id: rowHover }
+            // Launch position: + is down. `shake` is the ignition rumble.
+            property real drop: 0
+            property real shake: 0
+            property real trail: 0
+            property real fade: 1
 
-            Rectangle {
-              anchors.fill: parent
+            onGoneChanged: {
+              if (gone) { rumble.stop(); launch.restart(); return }
+              // Back on the pad (a preview, or a drive that stayed attached).
+              launch.stop()
+              drop = 0; trail = 0; fade = 1; height = slotHeight
+            }
+            Component.onCompleted: if (gone) { height = 0; Qt.callLater(root.landed, name) }
+
+            BorderSurface {
+              id: padSurface
+              width: padSnap.px(parent.width)
+              height: padSnap.px(pad.fullHeight)
+              transform: Translate { id: padShift }
               radius: Style.cornerRadius
-              color: rowHover.hovered ? Style.hoverFillFor(root.foreground, Commons.Color.accent) : "transparent"
-              Behavior on color { ColorAnimation { duration: Style.duration(120) } }
+              color: Style.normalFillFor(root.foreground, Commons.Color.accent)
+              borderSpec: Border.controlSpec("normal", root.foreground, Commons.Color.accent)
+
+              PixelSnap { id: padSnap; target: padSurface; shift: padShift; outputScale: root.outputScale }
             }
 
-            DriveIcon {
-              id: rowIcon
-              anchors.left: parent.left
-              anchors.leftMargin: Style.space(10)
-              anchors.verticalCenter: parent.verticalCenter
-              iconSize: Style.space(22)
-              color: ejectRow.mounted ? root.levelColor(DriveModel.usageFraction(ejectRow.primary)) : root.foreground
-              fill: ejectRow.mounted ? DriveModel.usageFraction(ejectRow.primary) : 0
-              outputScale: root.outputScale
-              lit: ejectRow.mounted
-              busy: ejectRow.busy
+            // The rocket: the drive icon, its exhaust above it (it flies down).
+            Item {
+              id: rocket
+              x: Style.space(12)
+              y: (pad.fullHeight - height) / 2
+              width: Style.space(24)
+              height: width
+              transform: Translate { x: pad.shake; y: pad.drop }
+
+              // Trail left behind while it falls.
+              Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.top
+                anchors.bottomMargin: -Style.space(4)
+                width: 2 * pad.p
+                height: pad.trail
+                visible: height > 0.5
+                gradient: Gradient {
+                  GradientStop { position: 0.0; color: "transparent" }
+                  GradientStop { position: 1.0; color: pad.tint }
+                }
+              }
+
+              // Exhaust: three pixel puffs that flicker while it rumbles.
+              Repeater {
+                model: 3
+                Rectangle {
+                  required property int index
+                  width: 2 * pad.p; height: width
+                  x: Math.round((rocket.width / 2 + (index - 1) * 3 * pad.p) * pad.grid) / pad.grid - pad.p
+                  y: -Style.space(1) - (index === 1 ? 3 * pad.p : 0)
+                  color: pad.tint
+                  opacity: 0
+                  visible: pad.busy || launch.running
+                  Timer {
+                    interval: 70 + parent.index * 23
+                    repeat: true
+                    running: (pad.busy || launch.running) && !Style.reduceMotion
+                    onTriggered: parent.opacity = Math.random() * 0.9
+                    onRunningChanged: if (!running) parent.opacity = 0
+                  }
+                }
+              }
+
+              DriveIcon {
+                anchors.centerIn: parent
+                iconSize: Style.space(22)
+                color: pad.tint
+                fill: pad.mounted ? DriveModel.usageFraction(pad.primary) : 0
+                outputScale: root.outputScale
+                lit: pad.mounted
+                busy: pad.busy
+              }
             }
 
             Column {
-              anchors.left: rowIcon.right
+              anchors.left: rocket.right
               anchors.leftMargin: Style.space(12)
-              anchors.right: ejectButton.left
+              anchors.right: padKey.left
               anchors.rightMargin: Style.space(8)
-              anchors.verticalCenter: parent.verticalCenter
+              y: (pad.fullHeight - height) / 2
               spacing: Style.space(1)
+              opacity: pad.fade
 
               SnapText {
-
                 outputScale: root.outputScale
                 width: parent.width
-                textFormat: Text.PlainText
-                text: ejectRow.drive.title
+                text: pad.drive ? pad.drive.title : ""
                 color: root.foreground
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.body
@@ -976,9 +1218,8 @@ Panel {
               SnapText {
                 outputScale: root.outputScale
                 width: parent.width
-                textFormat: Text.PlainText
-                text: ejectRow.busy ? strings.t("ejecting")
-                  : root.kindName(ejectRow.drive) + " · " + root.size(ejectRow.drive.size)
+                text: !pad.drive ? "" : pad.busy || pad.gone ? strings.t("ejecting")
+                  : root.kindName(pad.drive) + " · " + root.size(pad.drive.size)
                 color: root.dim
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
@@ -986,54 +1227,69 @@ Panel {
               }
             }
 
-            SnapButton {
-              id: ejectButton
+            SnapActionButton {
+              id: padKey
               outputScale: root.outputScale
               anchors.right: parent.right
-              anchors.rightMargin: Style.space(6)
-              anchors.verticalCenter: parent.verticalCenter
-              iconText: String.fromCodePoint(0xF01EA)
-              text: strings.t("ejectShort")
-              foreground: rowHover.hovered ? Commons.Color.accent : root.foreground
-              fontFamily: root.fontFamily
-              fontSize: Style.font.caption
-              iconSize: Style.font.body
+              anchors.rightMargin: Style.space(10)
+              y: Math.round((pad.fullHeight - height) / 2)
+              size: Style.space(28) | 1
               bordered: true
-              enabled: !ejectRow.busy
-              opacity: enabled ? 1 : 0.4
-              onClicked: root.eject(ejectRow.drive)
+              iconText: String.fromCodePoint(0xF01EA)
+              tooltipText: strings.t("ejectShort")
+              foreground: root.foreground
+              hoverColor: Commons.Color.accent
+              fontFamily: root.fontFamily
+              enabled: !pad.busy && !pad.gone && !!pad.drive
+              opacity: pad.fade * (enabled ? 1 : 0.4)
+              onClicked: root.eject(pad.drive)
+            }
+
+            // Ignition: a one-pixel rumble while the drive unmounts.
+            Timer {
+              id: rumble
+              property int step: 0
+              interval: 45
+              repeat: true
+              running: pad.busy && !pad.gone && !Style.reduceMotion
+              onTriggered: { step = (step + 1) % 4; pad.shake = [0, pad.p, 0, -pad.p][step] }
+              onRunningChanged: if (!running) pad.shake = 0
+            }
+
+            // Lift-off, downwards: a small hop, then it accelerates out of the
+            // pad with a trail, the text fades, and the pad folds shut.
+            SequentialAnimation {
+              id: launch
+              NumberAnimation { target: pad; property: "drop"; to: -3 * pad.p; duration: Style.duration(110); easing.type: Easing.OutQuad }
+              ParallelAnimation {
+                NumberAnimation { target: pad; property: "drop"; to: pad.fullHeight; duration: Style.duration(420); easing.type: Easing.InCubic }
+                NumberAnimation { target: pad; property: "trail"; from: 0; to: pad.fullHeight * 0.6; duration: Style.duration(420); easing.type: Easing.InQuad }
+                NumberAnimation { target: pad; property: "fade"; to: 0; duration: Style.duration(320); easing.type: Easing.OutCubic }
+              }
+              NumberAnimation { target: pad; property: "trail"; to: 0; duration: Style.duration(120) }
+              NumberAnimation { target: pad; property: "height"; to: 0; duration: Style.duration(200); easing.type: Easing.Bezier; easing.bezierCurve: Style.easeOut }
+              ScriptAction { script: root.landed(pad.name) }
             }
           }
         }
 
-        PanelSeparator {
+        // Eject all: one wide accent key under the pads.
+        SnapButton {
+          id: ejectAll
           visible: root.drives.length > 1
-          foreground: root.foreground
-        }
-
-        Item {
-          visible: root.drives.length > 1
-          width: parent.width
-          height: ejectAll.height
-
-          SnapButton {
-            id: ejectAll
-            outputScale: root.outputScale
-            // Full width: the panel's closing action, under every row, with
-            // the same edges as the divider and the drive rows above it.
-            x: 0
-            width: px(parent.width)
-            iconText: String.fromCodePoint(0xF01EA)
-            text: strings.t("ejectAll")
-            foreground: root.foreground
-            fontFamily: root.fontFamily
-            fontSize: Style.font.caption
-            iconSize: Style.font.body
-            bordered: true
-            enabled: !root.anyBusy
-            opacity: enabled ? 1 : 0.4
-            onClicked: root.ejectAll()
-          }
+          outputScale: root.outputScale
+          width: px(parent.width)
+          iconText: String.fromCodePoint(0xF01EA)
+          text: strings.t("ejectAll")
+          foreground: Commons.Color.accent
+          background: Qt.rgba(Commons.Color.accent.r, Commons.Color.accent.g, Commons.Color.accent.b, 0.12)
+          fontFamily: root.fontFamily
+          fontSize: Style.font.caption
+          iconSize: Style.font.body
+          bordered: true
+          enabled: !root.anyBusy
+          opacity: enabled ? 1 : 0.4
+          onClicked: root.ejectAll()
         }
       }
     }
@@ -1055,9 +1311,12 @@ Panel {
     function openDetails(): void { root.ejectMode = false; root.open() }
     function openEject(): void { root.ejectMode = true; root.open() }
     function refresh(): void { root.refresh() }
-    // Animation preview: `attach` replays the arrival, `busy` loops for N seconds.
+    // Animation preview: `attach` replays the arrival, `busy` loops for N
+    // seconds, `launch` opens the eject pop-up and plays an eject of the
+    // latest drive without touching it.
     function preview(kind: string, seconds: int): void {
       if (kind === "attach") { root.insertTick++; return }
+      if (kind === "launch") { root.previewLaunch(Math.max(1, Math.min(10, seconds))); return }
       root.previewBusy = true
       previewTimer.interval = Math.max(1, Math.min(120, seconds)) * 1000
       previewTimer.restart()

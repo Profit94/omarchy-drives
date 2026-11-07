@@ -36,5 +36,6 @@
   "err.busyBy": "Das Laufwerk wird von %1 verwendet. Schließe es und versuche es erneut.",
   "err.notAuthorized": "Nicht berechtigt.",
   "err.mountFailed": "Das Laufwerk konnte nicht eingehängt werden.",
-  "err.notDevice": "Das Laufwerk ist nicht mehr verbunden."
+  "err.notDevice": "Das Laufwerk ist nicht mehr verbunden.",
+  "system": "Dieser Computer"
 }

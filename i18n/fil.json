@@ -36,5 +36,6 @@
   "err.busyBy": "Ginagamit ng %1 ang drive. Isara ito at subukang muli.",
   "err.notAuthorized": "Hindi pinahihintulutan.",
   "err.mountFailed": "Hindi ma-mount ang drive.",
-  "err.notDevice": "Hindi na nakakonekta ang drive."
+  "err.notDevice": "Hindi na nakakonekta ang drive.",
+  "system": "Ang computer na ito"
 }

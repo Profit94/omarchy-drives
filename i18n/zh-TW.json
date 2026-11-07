@@ -35,5 +35,6 @@
   "err.busyBy": "%1 正在使用此磁碟機。請關閉後再試一次。",
   "err.notAuthorized": "未獲授權。",
   "err.mountFailed": "無法掛載磁碟機。",
-  "err.notDevice": "磁碟機已不再連接。"
+  "err.notDevice": "磁碟機已不再連接。",
+  "system": "這部電腦"
 }

@@ -36,5 +36,6 @@
   "err.busyBy": "De schijf wordt gebruikt door %1. Sluit het en probeer het opnieuw.",
   "err.notAuthorized": "Geen toestemming.",
   "err.mountFailed": "De schijf kan niet worden aangekoppeld.",
-  "err.notDevice": "De schijf is niet meer aangesloten."
+  "err.notDevice": "De schijf is niet meer aangesloten.",
+  "system": "Deze computer"
 }

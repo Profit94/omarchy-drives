@@ -36,5 +36,6 @@
   "err.busyBy": "Ketast kasutab %1. Sulge see ja proovi uuesti.",
   "err.notAuthorized": "Pole lubatud.",
   "err.mountFailed": "Ketast ei õnnestunud haakida.",
-  "err.notDevice": "Ketas pole enam ühendatud."
+  "err.notDevice": "Ketas pole enam ühendatud.",
+  "system": "See arvuti"
 }

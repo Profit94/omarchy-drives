@@ -37,5 +37,6 @@
   "err.busyBy": "Disk koristi %1. Zatvorite ga i pokušajte ponovno.",
   "err.notAuthorized": "Nije dopušteno.",
   "err.mountFailed": "Disk nije moguće montirati.",
-  "err.notDevice": "Disk više nije priključen."
+  "err.notDevice": "Disk više nije priključen.",
+  "system": "Ovo računalo"
 }

@@ -9,7 +9,7 @@ import qs.Commons
 //   attach  the slab settles down onto the bar, a gloss sweeps its top face
 //           once, the usage line draws in and the light comes on
 //   busy    the status light blinks
-//   eject   the slab lifts away upward and fades
+//   eject   the slab drops away downward, like a rocket, and fades
 Item {
   id: root
 
@@ -240,8 +240,8 @@ Item {
     id: ejectAnim
     ScriptAction { script: root.shownFill = 0 }
     ParallelAnimation {
-      NumberAnimation { target: root; property: "lift"; to: -4 * root.u; duration: Style.duration(220); easing.type: Easing.OutCubic }
-      NumberAnimation { target: slab; property: "opacity"; to: 0; duration: Style.duration(200); easing.type: Easing.OutCubic }
+      NumberAnimation { target: root; property: "lift"; to: 8 * root.u; duration: Style.duration(260); easing.type: Easing.InCubic }
+      NumberAnimation { target: slab; property: "opacity"; to: 0; duration: Style.duration(260); easing.type: Easing.InQuad }
     }
     ScriptAction { script: root.lift = 0 }
   }

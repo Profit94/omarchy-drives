@@ -36,5 +36,6 @@
   "err.busyBy": "Diski inatumiwa na %1. Ifunge kisha ujaribu tena.",
   "err.notAuthorized": "Hairuhusiwi.",
   "err.mountFailed": "Imeshindwa kupachika diski.",
-  "err.notDevice": "Diski haijaunganishwa tena."
+  "err.notDevice": "Diski haijaunganishwa tena.",
+  "system": "Kompyuta hii"
 }

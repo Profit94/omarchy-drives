@@ -35,5 +35,6 @@
   "err.busyBy": "ドライブは %1 が使用中です。閉じてからもう一度お試しください。",
   "err.notAuthorized": "許可されていません。",
   "err.mountFailed": "ドライブをマウントできませんでした。",
-  "err.notDevice": "ドライブはもう接続されていません。"
+  "err.notDevice": "ドライブはもう接続されていません。",
+  "system": "このコンピューター"
 }

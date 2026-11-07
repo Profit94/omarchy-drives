@@ -36,5 +36,6 @@
   "err.busyBy": "Enheten används av %1. Stäng det och försök igen.",
   "err.notAuthorized": "Inte behörig.",
   "err.mountFailed": "Enheten kunde inte monteras.",
-  "err.notDevice": "Enheten är inte längre ansluten."
+  "err.notDevice": "Enheten är inte längre ansluten.",
+  "system": "Den här datorn"
 }

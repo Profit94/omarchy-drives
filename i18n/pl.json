@@ -38,5 +38,6 @@
   "err.busyBy": "Dysk jest używany przez %1. Zamknij go i spróbuj ponownie.",
   "err.notAuthorized": "Brak uprawnień.",
   "err.mountFailed": "Nie można zamontować dysku.",
-  "err.notDevice": "Dysk nie jest już podłączony."
+  "err.notDevice": "Dysk nie jest już podłączony.",
+  "system": "Ten komputer"
 }

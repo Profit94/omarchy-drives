@@ -35,5 +35,6 @@
   "err.busyBy": "%1 正在使用该驱动器。请关闭后重试。",
   "err.notAuthorized": "未授权。",
   "err.mountFailed": "无法挂载驱动器。",
-  "err.notDevice": "驱动器已不再连接。"
+  "err.notDevice": "驱动器已不再连接。",
+  "system": "此电脑"
 }

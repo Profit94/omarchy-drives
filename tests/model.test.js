@@ -67,3 +67,14 @@ assert.deepStrictEqual(pal, { red: "#c94f6d", green: "#81b29a", yellow: "#dbc074
   assert.strictEqual(M.notifyFillSteps(50), 5)
 }
 console.log("ok")
+// system disk card
+{
+  const sys = M.parseSystem("253893804032 141490384896 108865966080 btrfs\ndisk 0 sata RTNTE256PCA8EADL\n")
+  assert.deepStrictEqual(sys, { total: 253893804032, used: 141490384896, free: 108865966080, fstype: "btrfs", model: "RTNTE256PCA8EADL", kind: "ssd" })
+  assert.strictEqual(M.parseSystem("1000 10 990 ext4\ndisk 0 nvme Samsung\\x20SSD\\x20980").model, "Samsung SSD 980")
+  assert.strictEqual(M.parseSystem("1000 10 990 ext4\ndisk 0 nvme X").kind, "nvme")
+  assert.strictEqual(M.parseSystem(""), null)
+  assert.strictEqual(M.parseSystem("1000 10 990 ext4").model, "")
+}
+console.log("ok system")
+

@@ -36,5 +36,6 @@
   "err.busyBy": "Stasjonen brukes av %1. Lukk det og prøv igjen.",
   "err.notAuthorized": "Ikke tillatt.",
   "err.mountFailed": "Kunne ikke montere stasjonen.",
-  "err.notDevice": "Stasjonen er ikke lenger tilkoblet."
+  "err.notDevice": "Stasjonen er ikke lenger tilkoblet.",
+  "system": "Denne datamaskinen"
 }

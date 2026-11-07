@@ -36,5 +36,6 @@
   "err.busyBy": "Drevet bruges af %1. Luk det, og prøv igen.",
   "err.notAuthorized": "Ikke tilladt.",
   "err.mountFailed": "Drevet kunne ikke monteres.",
-  "err.notDevice": "Drevet er ikke længere tilsluttet."
+  "err.notDevice": "Drevet er ikke længere tilsluttet.",
+  "system": "Denne computer"
 }

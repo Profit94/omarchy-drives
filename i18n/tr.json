@@ -36,5 +36,6 @@
   "err.busyBy": "Sürücü %1 tarafından kullanılıyor. Kapatıp yeniden deneyin.",
   "err.notAuthorized": "Yetki yok.",
   "err.mountFailed": "Sürücü bağlanamadı.",
-  "err.notDevice": "Sürücü artık bağlı değil."
+  "err.notDevice": "Sürücü artık bağlı değil.",
+  "system": "Bu bilgisayar"
 }

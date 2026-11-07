@@ -37,5 +37,6 @@
   "err.busyBy": "Disku izmanto %1. Aizveriet to un mēģiniet vēlreiz.",
   "err.notAuthorized": "Nav atļauts.",
   "err.mountFailed": "Disku neizdevās montēt.",
-  "err.notDevice": "Disks vairs nav pievienots."
+  "err.notDevice": "Disks vairs nav pievienots.",
+  "system": "Šis dators"
 }

@@ -38,5 +38,6 @@
   "err.busyBy": "Pogon uporablja %1. Zaprite ga in poskusite znova.",
   "err.notAuthorized": "Ni dovoljeno.",
   "err.mountFailed": "Pogona ni mogoče priklopiti.",
-  "err.notDevice": "Pogon ni več priključen."
+  "err.notDevice": "Pogon ni več priključen.",
+  "system": "Ta računalnik"
 }

@@ -39,5 +39,6 @@
   "err.busyBy": "Tá %1 ag úsáid an tiomántáin. Dún é agus bain triail eile as.",
   "err.notAuthorized": "Níl cead agat.",
   "err.mountFailed": "Níorbh fhéidir an tiomántán a fheistiú.",
-  "err.notDevice": "Níl an tiomántán ceangailte a thuilleadh."
+  "err.notDevice": "Níl an tiomántán ceangailte a thuilleadh.",
+  "system": "An ríomhaire seo"
 }

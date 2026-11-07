@@ -37,5 +37,6 @@
   "err.busyBy": "A unidade está a ser usada por %1. Feche-o e tente novamente.",
   "err.notAuthorized": "Não autorizado.",
   "err.mountFailed": "Não foi possível montar a unidade.",
-  "err.notDevice": "A unidade já não está ligada."
+  "err.notDevice": "A unidade já não está ligada.",
+  "system": "Este computador"
 }

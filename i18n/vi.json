@@ -35,5 +35,6 @@
   "err.busyBy": "%1 đang sử dụng ổ đĩa. Hãy đóng nó và thử lại.",
   "err.notAuthorized": "Không được phép.",
   "err.mountFailed": "Không thể gắn kết ổ đĩa.",
-  "err.notDevice": "Ổ đĩa không còn được kết nối."
+  "err.notDevice": "Ổ đĩa không còn được kết nối.",
+  "system": "Máy tính này"
 }

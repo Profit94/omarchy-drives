@@ -37,5 +37,6 @@
   "err.busyBy": "Unitatea este folosită de %1. Închide-l și încearcă din nou.",
   "err.notAuthorized": "Neautorizat.",
   "err.mountFailed": "Unitatea nu a putut fi montată.",
-  "err.notDevice": "Unitatea nu mai este conectată."
+  "err.notDevice": "Unitatea nu mai este conectată.",
+  "system": "Acest computer"
 }

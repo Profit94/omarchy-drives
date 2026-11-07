@@ -36,5 +36,6 @@
   "err.busyBy": "%1 er að nota drifið. Lokaðu því og reyndu aftur.",
   "err.notAuthorized": "Ekki heimilt.",
   "err.mountFailed": "Ekki tókst að tengja drifið.",
-  "err.notDevice": "Drifið er ekki lengur tengt."
+  "err.notDevice": "Drifið er ekki lengur tengt.",
+  "system": "Þessi tölva"
 }

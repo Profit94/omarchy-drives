@@ -35,5 +35,6 @@
   "err.busyBy": "Drive sedang digunakan oleh %1. Tutup lalu coba lagi.",
   "err.notAuthorized": "Tidak diizinkan.",
   "err.mountFailed": "Drive tidak dapat dikaitkan.",
-  "err.notDevice": "Drive tidak lagi tersambung."
+  "err.notDevice": "Drive tidak lagi tersambung.",
+  "system": "Komputer ini"
 }

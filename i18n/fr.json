@@ -37,5 +37,6 @@
   "err.busyBy": "Le disque est utilisé par %1. Fermez-le et réessayez.",
   "err.notAuthorized": "Non autorisé.",
   "err.mountFailed": "Impossible de monter le disque.",
-  "err.notDevice": "Le disque n’est plus connecté."
+  "err.notDevice": "Le disque n’est plus connecté.",
+  "system": "Cet ordinateur"
 }
