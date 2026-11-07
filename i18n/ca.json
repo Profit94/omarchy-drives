@@ -26,7 +26,6 @@
     "other": "Connectades: %1"
   },
   "free": "lliure",
-  "ejectShort": "Expulsa",
   "ejectAll": "Expulsa-ho tot",
   "connecting": "S’està connectant una unitat…",
   "failed.open": "No s’ha pogut obrir %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "%1 està fent servir la unitat. Tanqueu-lo i torneu-ho a provar.",
   "err.notAuthorized": "No autoritzat.",
   "err.mountFailed": "No s’ha pogut muntar la unitat.",
-  "err.notDevice": "La unitat ja no està connectada.",
-  "system": "Aquest ordinador"
+  "err.notDevice": "La unitat ja no està connectada."
 }

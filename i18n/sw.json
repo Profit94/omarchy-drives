@@ -25,7 +25,6 @@
     "other": "Zilizounganishwa: %1"
   },
   "free": "wazi",
-  "ejectShort": "Toa",
   "ejectAll": "Toa zote",
   "connecting": "Inaunganisha diski…",
   "failed.open": "Imeshindwa kufungua %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "Diski inatumiwa na %1. Ifunge kisha ujaribu tena.",
   "err.notAuthorized": "Hairuhusiwi.",
   "err.mountFailed": "Imeshindwa kupachika diski.",
-  "err.notDevice": "Diski haijaunganishwa tena.",
-  "system": "Kompyuta hii"
+  "err.notDevice": "Diski haijaunganishwa tena."
 }

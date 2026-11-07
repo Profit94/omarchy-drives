@@ -244,33 +244,9 @@ function notifyFillSteps(n) {
   return Math.max(1, Math.floor((n - 2 * m - 9 * m) / m))
 }
 
-// The computer's own disk, for the card above the drives. `text` is
-//   df -B1 --output=size,used,avail,fstype /   (last line)
-//   lsblk -nsro TYPE,ROTA,TRAN,MODEL <root source>   (the disk line)
-// as written by the panel's probe. Returns { total, used, free, fstype,
-// model, kind } or null when df gave nothing usable.
-function parseSystem(text) {
-  var lines = String(text || "").split("\n").map(function(l) { return l.trim() }).filter(function(l) { return l !== "" })
-  var df = null, disk = null
-  for (var i = 0; i < lines.length; i++) {
-    var f = lines[i].split(/\s+/)
-    if (!df && f.length >= 4 && /^\d+$/.test(f[0]) && /^\d+$/.test(f[1])) df = f
-    else if (!disk && f[0] === "disk") disk = f
-  }
-  if (!df || num(df[0]) === 0) return null
-  var model = "", kind = "disk"
-  if (disk) {
-    // lsblk -r writes spaces in the model as \x20.
-    model = clean(disk.slice(3).join(" ").replace(/\\x20/g, " "), 48)
-    kind = kindOf({ name: "", tran: disk[2] === "nvme" ? "nvme" : disk[2], rota: disk[1], rm: false })
-    if (kind === "disk" && disk[1] === "0") kind = "ssd"
-  }
-  return { total: num(df[0]), used: num(df[1]), free: num(df[2]), fstype: clean(df[3], 16), model: model, kind: kind }
-}
-
 function validDevice(path) { return /^\/dev\/[A-Za-z0-9._-]+$/.test(String(path || "")) }
 
 if (typeof module !== "undefined") module.exports = {
   parseDrives: parseDrives, primaryPart: primaryPart, mountedParts: mountedParts,
-  formatBytes: formatBytes, usageFraction: usageFraction, diff: diff, validDevice: validDevice, kindOf: kindOf, errorKey: errorKey, usageLevel: usageLevel, parsePalette: parsePalette, stripLayout: stripLayout, notifyIconSvg: notifyIconSvg, notifyFillSteps: notifyFillSteps, parseSystem: parseSystem, byName: byName
+  formatBytes: formatBytes, usageFraction: usageFraction, diff: diff, validDevice: validDevice, kindOf: kindOf, errorKey: errorKey, usageLevel: usageLevel, parsePalette: parsePalette, stripLayout: stripLayout, notifyIconSvg: notifyIconSvg, notifyFillSteps: notifyFillSteps
 }

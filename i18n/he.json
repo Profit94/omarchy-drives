@@ -26,7 +26,6 @@
     "other": "מחוברים: %1"
   },
   "free": "פנוי",
-  "ejectShort": "הוצאה",
   "ejectAll": "הוצאת הכול",
   "connecting": "מחבר כונן…",
   "failed.open": "לא ניתן לפתוח את %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "הכונן בשימוש על ידי %1. יש לסגור אותו ולנסות שוב.",
   "err.notAuthorized": "אין הרשאה.",
   "err.mountFailed": "לא ניתן לעגן את הכונן.",
-  "err.notDevice": "הכונן כבר לא מחובר.",
-  "system": "המחשב הזה"
+  "err.notDevice": "הכונן כבר לא מחובר."
 }

@@ -1,20 +1,18 @@
 # Drives for Omarchy
 
 <p align="center">
-  <img src="preview.png" alt="The Drives panel open under the Omarchy bar, with the computer's own disk and a USB drive" width="500">
+  <img src="preview.png" alt="The Drives panel open under the Omarchy bar, with a USB drive card" width="500">
 </p>
 
 A minimal drive control for the Omarchy bar. A small external-drive icon appears while a USB stick, SD card or external SSD, HDD or NVMe drive is attached, whether by USB-A, USB-C or Thunderbolt. It disappears when the last one is removed. Your laptop's own disks are never listed.
 
-Click it to see your computer's own disk, then a card per drive: a small radar scope and a strip showing how full it is, coloured green, yellow or red with your theme, and its filesystems. Right-click for a pop-up to eject drives safely. It uses your Omarchy theme, font and language.
+Click it for a card per drive: its capacity, a small radar scope and a strip showing how full it is, coloured green, yellow or red with your theme, and its filesystems. Each card has an Eject button, and Eject all appears in the header when two or more drives are attached; the bar icon drops out like a rocket when one goes. It uses your Omarchy theme, font and language.
 
-| Left-click for details | Right-click to eject |
+| A drive card, hovered | The bar icon |
 |---|---|
-| ![The system disk and a drive card, each with a radar gauge](docs/details.png) | ![The eject pop-up with an Eject key per drive](docs/eject-list.png) |
+| ![A drive card with its radar gauge and the Open, Terminal, Copy path and Eject buttons](docs/details.png) | ![The drive icon in the Omarchy bar, before Wi-Fi](docs/bar-icon.png) |
 
-| The bar icon | A notification |
-|---|---|
-| ![The drive icon in the Omarchy bar, before Wi-Fi](docs/bar-icon.png) | ![A "Synk connected" notification with the drive icon](docs/notification.png) |
+![A "Synk connected" notification with the drive icon](docs/notification.png)
 
 ## Install
 
@@ -29,18 +27,17 @@ Plugins run unsandboxed inside the Omarchy shell, so review the code before inst
 
 | Input | Action |
 |---|---|
-| Left-click | Open the system disk and the drive cards |
-| Right-click | Open the eject pop-up |
+| Left-click | Open the drive cards |
+| Right-click | Nothing, so a stray click can't eject a drive |
 | Middle-click | Open the most recently attached drive in the file manager |
 | Hover a card | Show Open, Open in terminal, Copy path and Eject |
 | Click a filesystem chip | Mount or unmount it |
-| Eject all | Eject every drive, one after another |
+| Eject all (header, 2+ drives) | Eject every drive, one after another |
 
 ## What it does
 
 - **Attach.** The icon appears the moment a USB storage device is plugged in, with its light blinking while a hard drive spins up. The drive is mounted and opened in your file manager as soon as it is ready, and you get a notification.
-- **System disk.** The left-click panel starts with the computer's own disk, so you can see how much room is left on it next to your drives.
-- **Eject.** In the right-click pop-up, a drive rumbles while it unmounts, then drops out of its pad like a rocket and the pad folds away. File manager windows showing the drive are closed first, because they keep it busy. The drive is then unmounted and powered off. If another app still holds it, the notification says which one.
+- **Eject.** If a file manager still has a folder open on the drive (a background tab, or a window you moved elsewhere), the drive is detached anyway: with only folders open there is nothing unsaved, and the file manager moves home. Any other program, or an open file, stops the eject and the notification names it. When a drive is ejected, the bar icon hops a pixel and drops out through the bottom of the bar with a short pixel exhaust, about 0.7 s, then comes back if other drives are still attached. File manager windows showing the drive are closed first, because they keep it busy. The drive is then unmounted and powered off. If another app still holds it, the notification says which one.
 - **Removal.** A notification tells you when a drive can be unplugged, and warns you if one was pulled out while still in use.
 - **Pixel-sharp.** Outlines, text and the icon are snapped to whole screen pixels at any display scale, including fractional ones such as 1.25×.
 
@@ -54,9 +51,9 @@ Set these with `omarchy bar set softwave.drives <key> <value> --json`.
 | `notify` | `true` | Notify when a drive is attached, ejected or removed |
 | `alwaysShow` | `false` | Keep the icon in the bar when no drive is attached |
 
-IPC: `omarchy-shell softwave.drives.actions openLatest | ejectLatest | openDetails | openEject | refresh`.
+IPC: `omarchy-shell softwave.drives.actions openLatest | ejectLatest | openDetails | refresh`.
 
-To see the eject animation without ejecting anything: `omarchy-shell softwave.drives.actions preview launch 2` plays a two-second dry run on the latest drive.
+To see the eject animation without ejecting anything: `omarchy-shell softwave.drives.actions preview launch 0`.
 
 ## Languages
 
@@ -66,8 +63,7 @@ The panels and notifications follow Omarchy's language (Setup > Language), live 
 
 - It reads drives from udisks and `lsblk`, and watches USB events with `udevadm`. Nothing is sent anywhere.
 - Notification icons are written to `$XDG_RUNTIME_DIR/softwave-drives`.
-- The system disk is read with `df` and `lsblk` when the panel opens.
-- At rest nothing moves, and the icon uses no measurable CPU. While a drive ejects, only its light blinks, twice a second. That measured about 0.5% of one CPU core in the shell, on an Intel HD Graphics 620 laptop. Animations stop with `omarchy toggle animations`.
+- At rest nothing moves, and the icon uses no measurable CPU. While a drive ejects, only its light blinks, twice a second, and the eject drop moves in whole-pixel steps, about 10 redraws in 0.6 s. Measured on an Intel HD Graphics 620 laptop, the shell used about 4% of one core while it played, against 1 to 2% at rest. During Eject all, the drop plays once, for the last drive. The radar's busy sweep steps 10 times a second rather than every frame. That measured about 0.5% of one CPU core in the shell, on an Intel HD Graphics 620 laptop. Animations stop with `omarchy toggle animations`.
 
 ## Known issues
 

@@ -3,16 +3,16 @@ import QtQuick.Shapes
 import qs.Commons
 import qs.Commons as Commons
 
-// Used space as a small radar scope: an outer ring, a faint inner ring and
-// four cardinal ticks, all one screen pixel wide. The used share is a sweep
+// Used space as a small radar scope: an outer ring, a faint inner ring with
+// four short crosshair stubs pointing in, all one screen pixel wide. The used share is a sweep
 // that starts at twelve o'clock, fades in towards its leading edge, and ends
 // on a crisp line and a blip, like the last contact on a scope. The
 // percentage sits in the middle. While busy, the sweep circles.
 //
-// Lines are laid out on the monitor's real pixel grid (`outputScale`): the
-// size is an odd number of pixels so the centre and the ticks fall on a
-// whole pixel column and row, and ring radii sit half a pixel in so a
-// 1-pixel stroke covers exactly one ring of pixels.
+// Lines are laid out on the monitor's real pixel grid (`outputScale`): size
+// it with `fit()` so it is an odd number of pixels, and the centre, the
+// stubs and the number all fall on the same middle pixel column and row.
+// Ring radii are whole pixels from that centre, and the picture is mirror-symmetric both ways.
 Item {
   id: root
 
@@ -35,14 +35,20 @@ Item {
   readonly property real c: (Math.floor(npx / 2) + 0.5) * p // centre of the middle pixel
   readonly property int outerPx: Math.floor(npx / 2)
   readonly property int innerPx: Math.round(outerPx * 0.58)
-  readonly property real rOut: (outerPx - 0.5) * p
-  readonly property real rIn: (innerPx - 0.5) * p
+  // The centre is the middle of a pixel, so whole-pixel radii put a
+  // 1-pixel stroke squarely on one ring of pixels.
+  readonly property real rOut: outerPx * p
+  readonly property real rIn: innerPx * p
   // The sweep fills the band between the rings, so the number stays clear.
-  readonly property real rBand: rIn + p
+  readonly property real rBand: rIn + p / 2
+  readonly property real rEdge: rOut - p / 2
 
   readonly property real sweep: busy ? 110 : Math.max(0, Math.min(1, shown)) * 360
   readonly property real lead: -90 + sweep                  // leading edge, clockwise from 3 o'clock
   readonly property color ink: color
+
+  // The nearest odd number of screen pixels at or below `v`, in layout units.
+  function fit(v) { var n = Math.floor(v * grid); if (n % 2 === 0) n -= 1; return Math.max(1, n) / grid }
 
   function ux(a, r) { return c + r * Math.cos(a * Math.PI / 180) }
   function uy(a, r) { return c + r * Math.sin(a * Math.PI / 180) }
@@ -66,20 +72,20 @@ Item {
     }
   }
 
-  // Cardinal ticks, as whole-pixel rectangles between the two rings.
+  // Crosshair stubs: two pixels each, from the inner ring towards the
+  // centre, so they frame the number without crossing the sweep.
   Repeater {
     model: 4
     Rectangle {
       required property int index
       readonly property bool vertical: index % 2 === 0
-      readonly property int len: Math.max(1, root.outerPx - root.innerPx - 2)
+      readonly property int mid: Math.floor(root.npx / 2)
+      readonly property int len: 2
       color: root.trackColor
-      width: vertical ? root.p : len * root.p
-      height: vertical ? len * root.p : root.p
-      x: vertical ? Math.floor(root.npx / 2) * root.p
-         : index === 1 ? (root.npx - 1 - len) * root.p : root.p
-      y: !vertical ? Math.floor(root.npx / 2) * root.p
-         : index === 2 ? (root.npx - 1 - len) * root.p : root.p
+      width: (vertical ? 1 : len) * root.p
+      height: (vertical ? len : 1) * root.p
+      x: (vertical ? mid : index === 1 ? mid + root.innerPx - len : mid - root.innerPx + 1) * root.p
+      y: (!vertical ? mid : index === 2 ? mid + root.innerPx - len : mid - root.innerPx + 1) * root.p
     }
   }
 
@@ -90,27 +96,34 @@ Item {
     anchors.fill: parent
     visible: root.busy || (root.mounted && root.sweep > 0.5)
 
+    // The trail: 15-degree steps of afterglow. Each layer runs from its step
+    // to the leading edge, so they overlap rather than meet (no seams) and
+    // stack up brightest at the edge, about 45% there.
+    readonly property int slices: Math.max(1, Math.ceil(root.sweep / 15))
+    Repeater {
+      model: sweepLayer.slices
+      Shape {
+        id: slice
+        required property int index
+        readonly property real a0: -90 + root.sweep * index / sweepLayer.slices
+        readonly property real a1: root.lead
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+          strokeColor: "transparent"
+          fillColor: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 1 - Math.pow(0.55, 1 / sweepLayer.slices))
+          startX: root.ux(slice.a0, root.rBand); startY: root.uy(slice.a0, root.rBand)
+          PathLine { x: root.ux(slice.a0, root.rEdge); y: root.uy(slice.a0, root.rEdge) }
+          PathAngleArc { centerX: root.c; centerY: root.c; radiusX: root.rEdge; radiusY: root.rEdge; startAngle: slice.a0; sweepAngle: slice.a1 - slice.a0; moveToStart: false }
+          PathLine { x: root.ux(slice.a1, root.rBand); y: root.uy(slice.a1, root.rBand) }
+          PathAngleArc { centerX: root.c; centerY: root.c; radiusX: root.rBand; radiusY: root.rBand; startAngle: slice.a1; sweepAngle: slice.a0 - slice.a1; moveToStart: false }
+        }
+      }
+    }
+
     Shape {
       anchors.fill: parent
       preferredRendererType: Shape.CurveRenderer
-
-      ShapePath {
-        strokeColor: "transparent"
-        fillGradient: ConicalGradient {
-          centerX: root.c; centerY: root.c
-          // Conical angles run counter-clockwise from 3 o'clock, so the
-          // gradient starts at the leading edge and fades back over the sweep.
-          angle: -root.lead
-          GradientStop { position: 0.0; color: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.55) }
-          GradientStop { position: Math.max(0.002, root.sweep / 360); color: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.06) }
-          GradientStop { position: 1.0; color: Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.06) }
-        }
-        startX: root.ux(-90, root.rBand); startY: root.uy(-90, root.rBand)
-        PathLine { x: root.ux(-90, root.rOut); y: root.uy(-90, root.rOut) }
-        PathAngleArc { centerX: root.c; centerY: root.c; radiusX: root.rOut; radiusY: root.rOut; startAngle: -90; sweepAngle: root.sweep; moveToStart: false }
-        PathLine { x: root.ux(root.lead, root.rBand); y: root.uy(root.lead, root.rBand) }
-        PathAngleArc { centerX: root.c; centerY: root.c; radiusX: root.rBand; radiusY: root.rBand; startAngle: root.lead; sweepAngle: -root.sweep; moveToStart: false }
-      }
 
       // Used arc on the outer ring, one pixel, in full colour.
       ShapePath {
@@ -126,7 +139,7 @@ Item {
         strokeWidth: root.p
         capStyle: ShapePath.FlatCap
         startX: root.ux(root.lead, root.rBand); startY: root.uy(root.lead, root.rBand)
-        PathLine { x: root.ux(root.lead, root.rOut); y: root.uy(root.lead, root.rOut) }
+        PathLine { x: root.ux(root.lead, root.rEdge); y: root.uy(root.lead, root.rEdge) }
       }
     }
 
@@ -138,18 +151,22 @@ Item {
       y: Math.round(root.uy(root.lead, root.rOut) * root.grid - 1.5) * root.p
     }
 
-    RotationAnimation on rotation {
-      running: root.busy && !Style.reduceMotion
-      loops: Animation.Infinite
-      from: 0; to: 360
-      duration: 1400
+    // Busy: the sweep steps round 30 degrees at a time, 10 times a second,
+    // instead of redrawing every frame. Easier on a laptop GPU.
+    Timer {
+      interval: 100
+      repeat: true
+      running: root.busy && root.visible && !Style.reduceMotion
+      onTriggered: sweepLayer.rotation = (sweepLayer.rotation + 30) % 360
       onRunningChanged: if (!running) sweepLayer.rotation = 0
     }
   }
 
   SnapText {
     visible: root.showText
-    anchors.centerIn: parent
+    // Centred on the middle pixel, not the box, then snapped.
+    x: root.c - implicitWidth / 2
+    y: root.c - implicitHeight / 2
     outputScale: root.outputScale
     text: root.busy ? "…" : root.mounted ? Commons.I18n.formatNumber(Math.round(root.value * 100), 0) + "%" : "—"
     color: root.textColor

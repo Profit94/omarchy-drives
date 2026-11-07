@@ -24,7 +24,6 @@
     "other": "已連接 %1 個"
   },
   "free": "可用",
-  "ejectShort": "退出",
   "ejectAll": "全部退出",
   "connecting": "正在連接磁碟機…",
   "failed.open": "無法開啟 %1",
@@ -35,6 +34,5 @@
   "err.busyBy": "%1 正在使用此磁碟機。請關閉後再試一次。",
   "err.notAuthorized": "未獲授權。",
   "err.mountFailed": "無法掛載磁碟機。",
-  "err.notDevice": "磁碟機已不再連接。",
-  "system": "這部電腦"
+  "err.notDevice": "磁碟機已不再連接。"
 }

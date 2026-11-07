@@ -25,7 +25,6 @@
     "other": "Tengd: %1"
   },
   "free": "laust",
-  "ejectShort": "Losa",
   "ejectAll": "Losa öll",
   "connecting": "Tengi drif…",
   "failed.open": "Ekki tókst að opna %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "%1 er að nota drifið. Lokaðu því og reyndu aftur.",
   "err.notAuthorized": "Ekki heimilt.",
   "err.mountFailed": "Ekki tókst að tengja drifið.",
-  "err.notDevice": "Drifið er ekki lengur tengt.",
-  "system": "Þessi tölva"
+  "err.notDevice": "Drifið er ekki lengur tengt."
 }

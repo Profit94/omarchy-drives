@@ -25,7 +25,6 @@
     "other": "Tilkoblet: %1"
   },
   "free": "ledig",
-  "ejectShort": "Løs ut",
   "ejectAll": "Løs ut alle",
   "connecting": "Kobler til en stasjon…",
   "failed.open": "Kunne ikke åpne %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "Stasjonen brukes av %1. Lukk det og prøv igjen.",
   "err.notAuthorized": "Ikke tillatt.",
   "err.mountFailed": "Kunne ikke montere stasjonen.",
-  "err.notDevice": "Stasjonen er ikke lenger tilkoblet.",
-  "system": "Denne datamaskinen"
+  "err.notDevice": "Stasjonen er ikke lenger tilkoblet."
 }

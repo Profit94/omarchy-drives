@@ -25,7 +25,6 @@
     "other": "Tilsluttet: %1"
   },
   "free": "ledig",
-  "ejectShort": "Skub ud",
   "ejectAll": "Skub alle ud",
   "connecting": "Tilslutter et drev…",
   "failed.open": "Kunne ikke åbne %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "Drevet bruges af %1. Luk det, og prøv igen.",
   "err.notAuthorized": "Ikke tilladt.",
   "err.mountFailed": "Drevet kunne ikke monteres.",
-  "err.notDevice": "Drevet er ikke længere tilsluttet.",
-  "system": "Denne computer"
+  "err.notDevice": "Drevet er ikke længere tilsluttet."
 }

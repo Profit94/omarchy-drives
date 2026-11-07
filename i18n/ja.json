@@ -24,7 +24,6 @@
     "other": "接続中 %1 台"
   },
   "free": "空き",
-  "ejectShort": "取り出す",
   "ejectAll": "すべて取り出す",
   "connecting": "ドライブを接続しています…",
   "failed.open": "%1 を開けませんでした",
@@ -35,6 +34,5 @@
   "err.busyBy": "ドライブは %1 が使用中です。閉じてからもう一度お試しください。",
   "err.notAuthorized": "許可されていません。",
   "err.mountFailed": "ドライブをマウントできませんでした。",
-  "err.notDevice": "ドライブはもう接続されていません。",
-  "system": "このコンピューター"
+  "err.notDevice": "ドライブはもう接続されていません。"
 }

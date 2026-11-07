@@ -27,7 +27,6 @@
     "other": "Podłączone: %1"
   },
   "free": "wolne",
-  "ejectShort": "Wysuń",
   "ejectAll": "Wysuń wszystkie",
   "connecting": "Podłączanie dysku…",
   "failed.open": "Nie można otworzyć %1",
@@ -38,6 +37,5 @@
   "err.busyBy": "Dysk jest używany przez %1. Zamknij go i spróbuj ponownie.",
   "err.notAuthorized": "Brak uprawnień.",
   "err.mountFailed": "Nie można zamontować dysku.",
-  "err.notDevice": "Dysk nie jest już podłączony.",
-  "system": "Ten komputer"
+  "err.notDevice": "Dysk nie jest już podłączony."
 }

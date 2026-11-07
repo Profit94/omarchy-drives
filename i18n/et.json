@@ -25,7 +25,6 @@
     "other": "Ühendatud: %1"
   },
   "free": "vaba",
-  "ejectShort": "Väljasta",
   "ejectAll": "Väljasta kõik",
   "connecting": "Ketta ühendamine…",
   "failed.open": "%1 avamine nurjus",
@@ -36,6 +35,5 @@
   "err.busyBy": "Ketast kasutab %1. Sulge see ja proovi uuesti.",
   "err.notAuthorized": "Pole lubatud.",
   "err.mountFailed": "Ketast ei õnnestunud haakida.",
-  "err.notDevice": "Ketas pole enam ühendatud.",
-  "system": "See arvuti"
+  "err.notDevice": "Ketas pole enam ühendatud."
 }

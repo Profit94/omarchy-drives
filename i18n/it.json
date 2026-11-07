@@ -26,7 +26,6 @@
     "other": "Collegate: %1"
   },
   "free": "libero",
-  "ejectShort": "Espelli",
   "ejectAll": "Espelli tutto",
   "connecting": "Collegamento di un’unità…",
   "failed.open": "Impossibile aprire %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "L’unità è in uso da parte di %1. Chiudilo e riprova.",
   "err.notAuthorized": "Non autorizzato.",
   "err.mountFailed": "Impossibile montare l’unità.",
-  "err.notDevice": "L’unità non è più collegata.",
-  "system": "Questo computer"
+  "err.notDevice": "L’unità non è più collegata."
 }

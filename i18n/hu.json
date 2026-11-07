@@ -25,7 +25,6 @@
     "other": "Csatlakoztatva: %1"
   },
   "free": "szabad",
-  "ejectShort": "Kiadás",
   "ejectAll": "Összes kiadása",
   "connecting": "Meghajtó csatlakoztatása…",
   "failed.open": "%1 nem nyitható meg",
@@ -36,6 +35,5 @@
   "err.busyBy": "A meghajtót a(z) %1 használja. Zárd be, és próbáld újra.",
   "err.notAuthorized": "Nincs jogosultság.",
   "err.mountFailed": "A meghajtót nem sikerült csatolni.",
-  "err.notDevice": "A meghajtó már nincs csatlakoztatva.",
-  "system": "Ez a számítógép"
+  "err.notDevice": "A meghajtó már nincs csatlakoztatva."
 }

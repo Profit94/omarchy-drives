@@ -26,7 +26,6 @@
     "other": "Prijungta: %1"
   },
   "free": "laisva",
-  "ejectShort": "Išimti",
   "ejectAll": "Išimti visus",
   "connecting": "Jungiamas diskas…",
   "failed.open": "Nepavyko atverti %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "Diską naudoja %1. Užverkite jį ir bandykite dar kartą.",
   "err.notAuthorized": "Neleidžiama.",
   "err.mountFailed": "Nepavyko prijungti disko.",
-  "err.notDevice": "Diskas nebeprijungtas.",
-  "system": "Šis kompiuteris"
+  "err.notDevice": "Diskas nebeprijungtas."
 }

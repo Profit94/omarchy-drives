@@ -25,7 +25,6 @@
     "other": "Ulangan: %1"
   },
   "free": "bo‘sh",
-  "ejectShort": "Chiqarish",
   "ejectAll": "Hammasini chiqarish",
   "connecting": "Disk ulanmoqda…",
   "failed.open": "%1 ni ochib bo‘lmadi",
@@ -36,6 +35,5 @@
   "err.busyBy": "Diskdan %1 foydalanmoqda. Uni yopib, qayta urinib ko‘ring.",
   "err.notAuthorized": "Ruxsat yo‘q.",
   "err.mountFailed": "Diskni tizimga ulab bo‘lmadi.",
-  "err.notDevice": "Disk endi ulanmagan.",
-  "system": "Ushbu kompyuter"
+  "err.notDevice": "Disk endi ulanmagan."
 }

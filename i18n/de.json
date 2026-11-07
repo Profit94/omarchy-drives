@@ -25,7 +25,6 @@
     "other": "Verbunden: %1"
   },
   "free": "frei",
-  "ejectShort": "Auswerfen",
   "ejectAll": "Alle auswerfen",
   "connecting": "Laufwerk wird verbunden…",
   "failed.open": "%1 konnte nicht geöffnet werden",
@@ -36,6 +35,5 @@
   "err.busyBy": "Das Laufwerk wird von %1 verwendet. Schließe es und versuche es erneut.",
   "err.notAuthorized": "Nicht berechtigt.",
   "err.mountFailed": "Das Laufwerk konnte nicht eingehängt werden.",
-  "err.notDevice": "Das Laufwerk ist nicht mehr verbunden.",
-  "system": "Dieser Computer"
+  "err.notDevice": "Das Laufwerk ist nicht mehr verbunden."
 }

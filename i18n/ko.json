@@ -24,7 +24,6 @@
     "other": "연결됨: %1개"
   },
   "free": "사용 가능",
-  "ejectShort": "꺼내기",
   "ejectAll": "모두 꺼내기",
   "connecting": "드라이브 연결 중…",
   "failed.open": "%1을(를) 열 수 없습니다",
@@ -35,6 +34,5 @@
   "err.busyBy": "%1에서 드라이브를 사용 중입니다. 닫고 다시 시도하세요.",
   "err.notAuthorized": "권한이 없습니다.",
   "err.mountFailed": "드라이브를 마운트할 수 없습니다.",
-  "err.notDevice": "드라이브가 더 이상 연결되어 있지 않습니다.",
-  "system": "이 컴퓨터"
+  "err.notDevice": "드라이브가 더 이상 연결되어 있지 않습니다."
 }

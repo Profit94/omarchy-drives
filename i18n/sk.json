@@ -26,7 +26,6 @@
     "other": "Pripojené: %1"
   },
   "free": "voľné",
-  "ejectShort": "Vysunúť",
   "ejectAll": "Vysunúť všetky",
   "connecting": "Pripája sa disk…",
   "failed.open": "%1 sa nepodarilo otvoriť",
@@ -37,6 +36,5 @@
   "err.busyBy": "Disk používa %1. Zatvorte ho a skúste to znova.",
   "err.notAuthorized": "Nemáte oprávnenie.",
   "err.mountFailed": "Disk sa nepodarilo pripojiť.",
-  "err.notDevice": "Disk už nie je pripojený.",
-  "system": "Tento počítač"
+  "err.notDevice": "Disk už nie je pripojený."
 }

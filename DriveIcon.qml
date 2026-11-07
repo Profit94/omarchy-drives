@@ -9,7 +9,8 @@ import qs.Commons
 //   attach  the slab settles down onto the bar, a gloss sweeps its top face
 //           once, the usage line draws in and the light comes on
 //   busy    the status light blinks
-//   eject   the slab drops away downward, like a rocket, and fades
+//   eject   a one-pixel hop, then the slab drops out through the bottom
+//           like a rocket, a short pixel exhaust flickering above it
 Item {
   id: root
 
@@ -20,6 +21,7 @@ Item {
   property bool busy: false
   property int insertTick: 0
   property int ejectTick: 0
+  property int returnTick: 0     // back in place at once, after a drop (other drives remain)
 
   readonly property real u: iconSize / 16
 
@@ -69,6 +71,7 @@ Item {
   property real shownFill: fill
   property real lift: 0          // vertical offset, + is down
   property real sheen: -1        // gloss position across the top face, 0..1; <0 hidden
+  property bool exhaust: false   // pixel exhaust, only while the eject drop plays
 
   Behavior on shownFill { NumberAnimation { duration: Style.duration(360); easing.type: Easing.OutCubic } }
 
@@ -79,8 +82,9 @@ Item {
   // Fixed painted bounds, so the bar doesn't rescale the icon while it moves.
   Rectangle { anchors.fill: parent; color: "transparent" }
 
-  onInsertTickChanged: { ejectAnim.stop(); insertAnim.restart() }
-  onEjectTickChanged: { insertAnim.stop(); ejectAnim.restart() }
+  onInsertTickChanged: { stopLaunch(); insertAnim.restart() }
+  onEjectTickChanged: { insertAnim.stop(); startLaunch() }
+  onReturnTickChanged: { insertAnim.stop(); stopLaunch(); slab.opacity = 1 }
 
   // Layout in whole screen pixels. `m` is the design pixel: 1 screen pixel
   // in the bar (about 15 px tall), 2 at the eject list's larger size, so the
@@ -118,6 +122,22 @@ Item {
     id: slab
     anchors.fill: parent
     transform: Translate { y: root.lift }
+
+    // Exhaust: one-pixel puffs above the top face, only during the drop.
+    // [column offset, row] in design pixels; row 0 sits just above the slab.
+    Repeater {
+      id: puffs
+      model: [[0, 0], [-2, 0], [2, 0], [-1, 1], [1, 1], [0, 2], [-1, 3], [1, 4]]
+      Rectangle {
+        required property var modelData
+        width: root.pp(root.m); height: width
+        x: root.x0 + root.pp(Math.floor(root.wpx / 2) + modelData[0] * root.m)
+        y: root.slabTop - root.pp((modelData[1] * 2 + 2) * root.m)
+        color: root.color
+        visible: root.exhaust
+        opacity: 0
+      }
+    }
 
     Shape {
       anchors.fill: parent
@@ -226,7 +246,7 @@ Item {
 
   SequentialAnimation {
     id: insertAnim
-    ScriptAction { script: { root.shownFill = 0; root.lift = -4 * root.u } }
+    ScriptAction { script: { root.stopLaunch(); root.shownFill = 0; root.lift = -4 * root.u } }
     ParallelAnimation {
       NumberAnimation { target: slab; property: "opacity"; from: 0; to: 1; duration: Style.duration(180); easing.type: Easing.OutCubic }
       NumberAnimation { target: root; property: "lift"; to: 0; duration: Style.duration(280); easing.type: Easing.Bezier; easing.bezierCurve: Style.easeOut }
@@ -236,13 +256,37 @@ Item {
     ScriptAction { script: { if (!root.busy) root.sheen = -1; root.measure() } }
   }
 
-  SequentialAnimation {
-    id: ejectAnim
-    ScriptAction { script: root.shownFill = 0 }
-    ParallelAnimation {
-      NumberAnimation { target: root; property: "lift"; to: 8 * root.u; duration: Style.duration(260); easing.type: Easing.InCubic }
-      NumberAnimation { target: slab; property: "opacity"; to: 0; duration: Style.duration(260); easing.type: Easing.InQuad }
-    }
-    ScriptAction { script: root.lift = 0 }
+  // The drop, in whole design pixels: a one-pixel hop, then falling faster
+  // each step until it is through the bottom of the bar. One timer moves the
+  // slab and flickers every puff in the same step, so the bar redraws once
+  // per step (about 16 a second, 10 in all) instead of every frame, and not
+  // at all once it's done. The glassy bar is costly to redraw on a laptop GPU.
+  readonly property var dropSteps: [-1, -1, 0, 1, 2, 4, 7, 11, 16, 22]
+  property int launchStep: -1
+
+  function startLaunch() {
+    if (Style.reduceMotion) { stopLaunch(); slab.opacity = 0; return }
+    slab.opacity = 1
+    lift = 0
+    launchStep = -1
+    exhaust = true
+    launchTimer.restart()
   }
+  function stopLaunch() {
+    launchTimer.stop()
+    launchStep = -1
+    exhaust = false
+    lift = 0
+  }
+  function launchTick() {
+    launchStep++
+    if (launchStep >= dropSteps.length) { stopLaunch(); slab.opacity = 0; return }
+    lift = pp(dropSteps[launchStep] * m)
+    for (var i = 0; i < puffs.count; i++) {
+      var puff = puffs.itemAt(i)
+      // Brighter near the nozzle, thinning out up the plume.
+      if (puff) puff.opacity = Math.random() < 0.7 ? (1 - puff.modelData[1] * 0.18) * (0.5 + Math.random() * 0.5) : 0
+    }
+  }
+  Timer { id: launchTimer; interval: 60; repeat: true; onTriggered: root.launchTick() }
 }

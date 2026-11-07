@@ -26,7 +26,6 @@
     "other": "Conectadas: %1"
   },
   "free": "livre",
-  "ejectShort": "Ejetar",
   "ejectAll": "Ejetar tudo",
   "connecting": "Conectando uma unidade…",
   "failed.open": "Não foi possível abrir %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "A unidade está sendo usada por %1. Feche-o e tente novamente.",
   "err.notAuthorized": "Não autorizado.",
   "err.mountFailed": "Não foi possível montar a unidade.",
-  "err.notDevice": "A unidade não está mais conectada.",
-  "system": "Este computador"
+  "err.notDevice": "A unidade não está mais conectada."
 }

@@ -25,7 +25,6 @@
     "other": "Anslutna: %1"
   },
   "free": "ledigt",
-  "ejectShort": "Mata ut",
   "ejectAll": "Mata ut alla",
   "connecting": "Ansluter en enhet…",
   "failed.open": "Kunde inte öppna %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "Enheten används av %1. Stäng det och försök igen.",
   "err.notAuthorized": "Inte behörig.",
   "err.mountFailed": "Enheten kunde inte monteras.",
-  "err.notDevice": "Enheten är inte längre ansluten.",
-  "system": "Den här datorn"
+  "err.notDevice": "Enheten är inte längre ansluten."
 }

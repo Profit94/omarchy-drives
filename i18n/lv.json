@@ -26,7 +26,6 @@
     "other": "Pievienoti: %1"
   },
   "free": "brīvs",
-  "ejectShort": "Izņemt",
   "ejectAll": "Izņemt visus",
   "connecting": "Pievieno disku…",
   "failed.open": "Neizdevās atvērt %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "Disku izmanto %1. Aizveriet to un mēģiniet vēlreiz.",
   "err.notAuthorized": "Nav atļauts.",
   "err.mountFailed": "Disku neizdevās montēt.",
-  "err.notDevice": "Disks vairs nav pievienots.",
-  "system": "Šis dators"
+  "err.notDevice": "Disks vairs nav pievienots."
 }

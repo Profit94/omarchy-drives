@@ -26,7 +26,6 @@
     "other": "Priključeno: %1"
   },
   "free": "slobodno",
-  "ejectShort": "Izbaci",
   "ejectAll": "Izbaci sve",
   "connecting": "Priključivanje diska…",
   "failed.open": "Nije moguće otvoriti %1",
@@ -37,6 +36,5 @@
   "err.busyBy": "Disk koristi %1. Zatvorite ga i pokušajte ponovno.",
   "err.notAuthorized": "Nije dopušteno.",
   "err.mountFailed": "Disk nije moguće montirati.",
-  "err.notDevice": "Disk više nije priključen.",
-  "system": "Ovo računalo"
+  "err.notDevice": "Disk više nije priključen."
 }

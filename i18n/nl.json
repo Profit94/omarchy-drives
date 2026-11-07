@@ -25,7 +25,6 @@
     "other": "Aangesloten: %1"
   },
   "free": "vrij",
-  "ejectShort": "Uitwerpen",
   "ejectAll": "Alles uitwerpen",
   "connecting": "Schijf wordt aangesloten…",
   "failed.open": "Kan %1 niet openen",
@@ -36,6 +35,5 @@
   "err.busyBy": "De schijf wordt gebruikt door %1. Sluit het en probeer het opnieuw.",
   "err.notAuthorized": "Geen toestemming.",
   "err.mountFailed": "De schijf kan niet worden aangekoppeld.",
-  "err.notDevice": "De schijf is niet meer aangesloten.",
-  "system": "Deze computer"
+  "err.notDevice": "De schijf is niet meer aangesloten."
 }

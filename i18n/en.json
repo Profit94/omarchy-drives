@@ -25,7 +25,6 @@
     "other": "%1 attached"
   },
   "free": "free",
-  "ejectShort": "Eject",
   "ejectAll": "Eject all",
   "connecting": "Connecting a drive…",
   "failed.open": "Couldn't open %1",
@@ -36,6 +35,5 @@
   "err.busyBy": "The drive is in use by %1. Close it and try again.",
   "err.notAuthorized": "Not authorized.",
   "err.mountFailed": "The drive could not be mounted.",
-  "err.notDevice": "The drive is no longer connected.",
-  "system": "This computer"
+  "err.notDevice": "The drive is no longer connected."
 }

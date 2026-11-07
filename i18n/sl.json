@@ -27,7 +27,6 @@
     "other": "Priključeni: %1"
   },
   "free": "prosto",
-  "ejectShort": "Izvrzi",
   "ejectAll": "Izvrzi vse",
   "connecting": "Priključevanje pogona…",
   "failed.open": "%1 ni mogoče odpreti",
@@ -38,6 +37,5 @@
   "err.busyBy": "Pogon uporablja %1. Zaprite ga in poskusite znova.",
   "err.notAuthorized": "Ni dovoljeno.",
   "err.mountFailed": "Pogona ni mogoče priklopiti.",
-  "err.notDevice": "Pogon ni več priključen.",
-  "system": "Ta računalnik"
+  "err.notDevice": "Pogon ni več priključen."
 }

@@ -24,7 +24,6 @@
     "other": "已连接 %1 个"
   },
   "free": "可用",
-  "ejectShort": "弹出",
   "ejectAll": "全部弹出",
   "connecting": "正在连接驱动器…",
   "failed.open": "无法打开 %1",
@@ -35,6 +34,5 @@
   "err.busyBy": "%1 正在使用该驱动器。请关闭后重试。",
   "err.notAuthorized": "未授权。",
   "err.mountFailed": "无法挂载驱动器。",
-  "err.notDevice": "驱动器已不再连接。",
-  "system": "此电脑"
+  "err.notDevice": "驱动器已不再连接。"
 }

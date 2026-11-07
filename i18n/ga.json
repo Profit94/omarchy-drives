@@ -28,7 +28,6 @@
     "other": "Ceangailte: %1"
   },
   "free": "saor",
-  "ejectShort": "Díchuir",
   "ejectAll": "Díchuir uile",
   "connecting": "Tiomántán á cheangal…",
   "failed.open": "Níorbh fhéidir %1 a oscailt",
@@ -39,6 +38,5 @@
   "err.busyBy": "Tá %1 ag úsáid an tiomántáin. Dún é agus bain triail eile as.",
   "err.notAuthorized": "Níl cead agat.",
   "err.mountFailed": "Níorbh fhéidir an tiomántán a fheistiú.",
-  "err.notDevice": "Níl an tiomántán ceangailte a thuilleadh.",
-  "system": "An ríomhaire seo"
+  "err.notDevice": "Níl an tiomántán ceangailte a thuilleadh."
 }

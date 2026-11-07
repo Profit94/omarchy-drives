@@ -24,7 +24,6 @@
     "other": "Tersambung: %1"
   },
   "free": "kosong",
-  "ejectShort": "Keluarkan",
   "ejectAll": "Keluarkan semua",
   "connecting": "Menyambungkan drive…",
   "failed.open": "Tidak dapat membuka %1",
@@ -35,6 +34,5 @@
   "err.busyBy": "Drive sedang digunakan oleh %1. Tutup lalu coba lagi.",
   "err.notAuthorized": "Tidak diizinkan.",
   "err.mountFailed": "Drive tidak dapat dikaitkan.",
-  "err.notDevice": "Drive tidak lagi tersambung.",
-  "system": "Komputer ini"
+  "err.notDevice": "Drive tidak lagi tersambung."
 }
