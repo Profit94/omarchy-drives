@@ -23,6 +23,14 @@ omarchy bar move softwave.drives --before omarchy.network
 
 Plugins run unsandboxed inside the Omarchy shell, so review the code before installing it.
 
+## Remove
+
+```bash
+omarchy plugin remove softwave.drives
+```
+
+This removes the plugin and its bar placement. Your other Omarchy settings are left untouched.
+
 ## Controls
 
 | Input | Action |
@@ -85,3 +93,7 @@ Omarchy, plus tools it already installs: udisks2, util-linux, systemd, glib2 (`g
 node tests/model.test.js
 node tests/i18n.test.js
 ```
+
+## License
+
+Copyright (c) 2026 Profit94. All rights reserved. You may install and use this plugin, and send fixes back through pull requests. Copying, redistributing, reusing its code or assets, or imitating its visual style is not permitted without written permission. See [LICENSE](LICENSE).

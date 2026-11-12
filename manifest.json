@@ -4,7 +4,7 @@
   "name": "Drives",
   "version": "1.2.1",
   "author": "Profit94",
-  "license": "MIT",
+  "license": "LicenseRef-Proprietary",
   "description": "Removable drives in the bar: USB sticks, SD cards and external SSD, HDD or NVMe disks. Notifies on attach and removal, opens new drives in the file manager, and ejects them safely.",
   "kinds": ["bar-widget"],
   "entryPoints": { "barWidget": "Panel.qml" },
